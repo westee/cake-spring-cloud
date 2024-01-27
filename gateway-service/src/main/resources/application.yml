@@ -1,0 +1,25 @@
+server:
+  port: 9201
+service-url:
+  user-service: http://localhost:8080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: status
+          uri: ${service-url.user-service}/api/v1/status
+          predicates:
+          - Path=/api/v1/status
+
+  application:
+    name: gateway-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8001/eureka/
