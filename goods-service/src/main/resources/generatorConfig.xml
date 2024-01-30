@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="cake" targetRuntime="MyBatis3">
+        <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/sc_cake_goods?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=utf-8&amp;serverTimezone=Asia/Shanghai"
+                        userId="root"
+                        password="root">
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="true"/>
+            <property name="useJSR310Types" value="true" />
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="com.westee.goodsservice.generate" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+            <property name="constructorBased" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="db.mybatis" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.westee.goodsservice.generate" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <table schema="cake" tableName="GOODS" domainObjectName="Goods">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="GOODS_TYPES" domainObjectName="GoodsTypes">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="SHOP" domainObjectName="Shop">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="GOODS_IMAGE" domainObjectName="GoodsImage">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CHARGE" domainObjectName="Charge">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="DISCOUNT" domainObjectName="Discount">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="COUPON" domainObjectName="Coupon">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="USER_COUPON" domainObjectName="UserCoupon">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="SWIPER" domainObjectName="Swiper">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CHARGE_OPTION" domainObjectName="ChargeOption">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="DISCOUNT_DAY" domainObjectName="DiscountDay">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CAKE" domainObjectName="Cake">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CAKE_TAG" domainObjectName="CakeTag">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CAKE_TAG_MAPPING" domainObjectName="CakeTagMapping">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+        <table schema="cake" tableName="CONFIG" domainObjectName="Config">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+
+    </context>
+</generatorConfiguration>
