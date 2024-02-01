@@ -1,0 +1,25 @@
+
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/sc-cake?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: auth-service
+
+mybatis:
+  config-location: classpath:db/mybatis/mybatis-config.xml
+
+shiro-redis:
+  enabled: true
+  redis-manager:
+    host: 127.0.0.1:6379
+
+eureka:
+  client:
+    register-with-eureka: true # ???Eureka?????
+    fetch-registry: true # ????????
+    service-url:
+      defaultZone: http://localhost:8001/eureka/ # ????????
+

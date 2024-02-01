@@ -48,6 +48,10 @@
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
         </table>
+        <table schema="sc-cake" tableName="ADDRESS" domainObjectName="Address">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
 
     </context>
 </generatorConfiguration>

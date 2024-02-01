@@ -3,6 +3,7 @@ package com.westee.loginservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.westee.loginservice.entity.LoginResponse;
 import com.westee.loginservice.entity.LoginResult;
+import com.westee.loginservice.entity.Response;
 import com.westee.loginservice.entity.TelAndCode;
 import com.westee.loginservice.entity.UsernameAndPassword;
 import com.westee.loginservice.entity.WXParams;
@@ -28,6 +29,7 @@ import org.apache.shiro.subject.Subject;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -52,6 +55,15 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @GetMapping("/y")
+    public String y() {
+        return "y";
+    }
+
+    @GetMapping("/api/data")
+    public List<String> z() {
+        return List.of("y", "x", "z");
+    }
 
     @PostMapping("/login")
     public void login(@RequestBody TelAndCode telAndCode) {
