@@ -1,13 +1,15 @@
-#server:
-#  port: 8700
+server:
+  port: 8001
 
 # 指定当前eureka客户端的注册地址，也就是eureka服务的提供方，当前配置的服务的注册服务方
 eureka:
+  instance:
+    hostname: localhost
   client:
-    service-url:
-      defaultZone: http://localhost:8698/eureka,http://localhost:8699/eureka  # http://${eureka.instance.hostname}:${server.port}/eureka
-    register-with-eureka: false #?? ???eureka??
-    fetch-registry: false  # 启动时禁用client的注册
+#    service-url:
+#      defaultZone: http://localhost:8698/eureka,http://localhost:8699/eureka  # http://${eureka.instance.hostname}:${server.port}/eureka
+    register-with-eureka: false # 指定是否要注册到注册中心（注册中心不需要开启）
+    fetch-registry: false  # 指定是否要从注册中心获取服务（注册中心不需要开启）
   server:
     renewal-percent-threshold: 0.85
 #  instance:

@@ -15,6 +15,10 @@ spring:
           uri: ${service-url.user-service}/api/v1/status
           predicates:
           - Path=/api/v1/status
+        - id: role
+          uri: ${service-url.user-service}/api/v1/role
+          predicates:
+          - Path=/api/v1/role
 
   application:
     name: gateway-service
