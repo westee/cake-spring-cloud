@@ -1,6 +1,8 @@
 package com.westee.openfeign.client;
 
+import com.westee.common.entity.Response;
 import com.westee.common.entity.Role;
+import com.westee.common.entity.User;
 import com.westee.openfeign.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface RoleServiceProviderClient {
 
     @RequestMapping(value = "/api/v1/role", method = RequestMethod.GET)
-    Role getData(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String Token);
+    Response<Role> getRole(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String Token);
+
+    @RequestMapping(value = "/api/v1/user", method = RequestMethod.GET)
+    Response<User> getUser(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String Token);
 
 }
