@@ -7,6 +7,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.http.HttpHeaders;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
@@ -22,7 +23,7 @@ public class JWTAuthFilter extends AuthenticatingFilter {
     protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) {
         //从请求头中获取token
         String token = getRequestToken((HttpServletRequest) request);
-        if (StringUtils.hasLength(token)) {
+        if (!StringUtils.hasLength(token)) {
             throw HttpException.notAuthorized("token不能为空"); //AuthenticationException("");
         }
         return new JWTToken(token);
@@ -49,10 +50,9 @@ public class JWTAuthFilter extends AuthenticatingFilter {
     //从请求头中获取token
     private String getRequestToken(HttpServletRequest request) {
         //从Header中获取token
-        String token = request.getHeader("Token");
-//        String token = request.getHeader("Authorization");
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasLength(token)) {
-//            token = token.substring(7);
+            token = token.substring(7);
         }
         return token;
     }
@@ -60,7 +60,7 @@ public class JWTAuthFilter extends AuthenticatingFilter {
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         String token = getRequestToken((HttpServletRequest) request);
-        if (StringUtils.hasLength(token)) {
+        if (!StringUtils.hasLength(token)) {
             return false;
         }
         try {
