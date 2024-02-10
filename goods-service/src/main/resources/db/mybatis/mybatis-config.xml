@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="useGeneratedKeys" value="true"/>
+    </settings>
+    <typeAliases>
+        <typeAlias type="com.westee.goodsservice.generate.Goods" alias="Goods"/>
+        <typeAlias type="com.westee.goodsservice.data.GoodsInfo" alias="GoodsInfo"/>
+    </typeAliases>
+    <mappers>
+        <mapper resource="db/mybatis/GoodsMapper.xml"/>
+        <mapper resource="db/mybatis/GoodsTypesMapper.xml"/>
+        <mapper resource="db/mybatis/ShopMapper.xml"/>
+        <mapper resource="db/mybatis/GoodsImageMapper.xml"/>
+        <mapper resource="db/mybatis/DiscountMapper.xml"/>
+        <mapper resource="db/mybatis/CouponMapper.xml"/>
+        <mapper resource="db/mybatis/UserCouponMapper.xml"/>
+        <mapper resource="db/mybatis/SwiperMapper.xml"/>
+        <mapper resource="db/mybatis/ChargeMapper.xml"/>
+        <mapper resource="db/mybatis/ChargeOptionMapper.xml"/>
+        <mapper resource="db/mybatis/DiscountDayMapper.xml"/>
+        <mapper resource="db/mybatis/CakeMapper.xml"/>
+        <mapper resource="db/mybatis/CakeTagMapper.xml"/>
+        <mapper resource="db/mybatis/CakeTagMappingMapper.xml"/>
+        <mapper resource="db/mybatis/ConfigMapper.xml"/>
+
+        <mapper resource="db/mybatis/MyGoodsMapper.xml"/>
+        <mapper resource="db/mybatis/MyGoodsWithImageMapper.xml"/>
+        <mapper resource="db/mybatis/GoodsStockMapper.xml"/>
+        <mapper resource="db/mybatis/MyCakeWithTagMapper.xml"/>
+    </mappers>
+</configuration>
