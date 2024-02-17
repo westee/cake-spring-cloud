@@ -1,45 +1,34 @@
 package com.westee.goodsservice.service;
 
-import com.westee.cake.dao.MyGoodsWithImageMapper;
-import com.westee.cake.entity.GoodsStatus;
-import com.westee.cake.entity.GoodsWithImages;
-import com.westee.cake.entity.PageResponse;
-import com.westee.cake.exceptions.HttpException;
-import com.westee.cake.generate.DiscountDay;
-import com.westee.cake.generate.DiscountDayExample;
-import com.westee.cake.generate.DiscountDayMapper;
-import com.westee.cake.generate.Goods;
-import com.westee.cake.generate.GoodsExample;
-import com.westee.cake.generate.GoodsImage;
-import com.westee.cake.generate.GoodsImageExample;
-import com.westee.cake.generate.GoodsImageMapper;
-import com.westee.cake.generate.GoodsMapper;
-import com.westee.cake.generate.Shop;
-import com.westee.cake.generate.ShopMapper;
-import com.westee.cake.mapper.MyGoodsMapper;
-import com.westee.cake.util.Utils;
 import com.westee.common.entity.PageResponse;
 import com.westee.common.exception.HttpException;
 import com.westee.common.utils.Utils;
 import com.westee.goodsservice.entity.GoodsStatus;
 import com.westee.goodsservice.entity.GoodsWithImages;
+import com.westee.goodsservice.generate.DiscountDay;
+import com.westee.goodsservice.generate.DiscountDayExample;
+import com.westee.goodsservice.generate.DiscountDayMapper;
 import com.westee.goodsservice.generate.Goods;
 import com.westee.goodsservice.generate.GoodsExample;
 import com.westee.goodsservice.generate.GoodsImage;
 import com.westee.goodsservice.generate.GoodsImageExample;
 import com.westee.goodsservice.generate.GoodsImageMapper;
 import com.westee.goodsservice.generate.GoodsMapper;
+import com.westee.goodsservice.generate.Shop;
+import com.westee.goodsservice.generate.ShopMapper;
 import com.westee.goodsservice.mapper.MyGoodsMapper;
 import com.westee.goodsservice.mapper.MyGoodsWithImageMapper;
+import com.westee.goodsservice.redis.RoleRedisService;
+import com.westee.goodsservice.redis.UserRedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,27 +39,32 @@ public class GoodsService {
     private final MyGoodsWithImageMapper myGoodsWithImageMapper;
     private final MyGoodsMapper myGoodsMapper;
     private final DiscountDayMapper discountDayMapper;
-
+    private final RoleRedisService roleRedisService;
+    private final UserRedisService userRedisService;
 
     @Autowired
     public GoodsService(GoodsMapper goodsMapper, ShopMapper shopMapper, GoodsImageMapper goodsImageMapper,
                         MyGoodsWithImageMapper myGoodsWithImageMapper, MyGoodsMapper myGoodsMapper,
-                         DiscountDayMapper discountDayMapper, RestTemplate restTemplate) {
+                        DiscountDayMapper discountDayMapper, RoleRedisService roleRedisService,
+                        UserRedisService userRedisService) {
         this.goodsMapper = goodsMapper;
         this.shopMapper = shopMapper;
         this.myGoodsMapper = myGoodsMapper;
         this.goodsImageMapper = goodsImageMapper;
         this.myGoodsWithImageMapper = myGoodsWithImageMapper;
         this.discountDayMapper = discountDayMapper;
-        this.restTemplate = restTemplate;
+        this.roleRedisService = roleRedisService;
+        this.userRedisService = userRedisService;
     }
 
-    public PageResponse<GoodsWithImages> getGoodsByShopIdAndCategoryId(Integer pageNum, Integer pageSize, Long shopId, String status) {
+    public PageResponse<GoodsWithImages> getGoodsByShopIdAndCategoryId(Integer pageNum, Integer pageSize, Long shopId,
+                                                                       String status) {
+
         Shop shop = shopMapper.selectByPrimaryKey(shopId);
         if (shop != null) {
             GoodsExample goodsExample = new GoodsExample();
             String statusString = "ok|deleted";
-            if(statusString.contains(status)) {
+            if (statusString.contains(status)) {
                 goodsExample.createCriteria().andStatusEqualTo(status);
             } else {
                 goodsExample.createCriteria().andStockEqualTo(0);
@@ -82,9 +76,9 @@ public class GoodsService {
                     myGoodsWithImageMapper.getGoodsListWithImageByShopId(shopId, pageSize, offset, status);
             goodsListWithImageByShopId.forEach(goodsWithImages -> goodsWithImages.setVipPrice(getGoodsDiscountPrice(goodsWithImages)));
             return PageResponse.pageData(pageNum, pageSize, totalPage, goodsListWithImageByShopId);
-        } else {
-            throw HttpException.forbidden("没有权限");
         }
+        throw HttpException.badRequest("参数错误");
+
     }
 
     public List<GoodsWithImages> getGoodsByShopIdAndCategoryId(Long shopId, Long categoryId) {
@@ -95,9 +89,8 @@ public class GoodsService {
             List<GoodsWithImages> goodsListWithImageByShopIdAndCategory = myGoodsWithImageMapper.getGoodsListWithImageByShopIdAndCategory(shopId, categoryId);
             goodsListWithImageByShopIdAndCategory.forEach(goodsWithImages -> goodsWithImages.setVipPrice(getGoodsDiscountPrice(goodsWithImages)));
             return goodsListWithImageByShopIdAndCategory;
-        } else {
-            throw HttpException.forbidden("没有权限");
         }
+        throw HttpException.forbidden("没有权限");
     }
 
     public GoodsWithImages getGoodsByGoodsId(long goodsId) {
@@ -107,7 +100,9 @@ public class GoodsService {
     }
 
     public GoodsWithImages createGoods(GoodsWithImages goods) {
-//        checkGoodsBelongToUser(goods, userId);
+        checkAdminRole();
+        checkGoodsBelongToUser(goods);
+
         goods.setCreatedAt(Utils.getNow());
         goods.setUpdatedAt(Utils.getNow());
         goods.setStatus(GoodsStatus.OK.getName());
@@ -117,7 +112,7 @@ public class GoodsService {
         } else {
             throw HttpException.badRequest("参数不合法");
         }
-        return myGoodsWithImageMapper.getGoodsWithImage(goods.getId());
+        return goods; // myGoodsWithImageMapper.getGoodsWithImage(goods.getId());
     }
 
     private void insertGoodsImage(List<String> images, long goodsId) {
@@ -132,7 +127,9 @@ public class GoodsService {
     }
 
     public GoodsWithImages updateGoods(GoodsWithImages goods) {
-//        checkGoodsBelongToUser(goods, userId);
+        checkAdminRole();
+        checkGoodsBelongToUser(goods);
+
         goods.setUpdatedAt(Utils.getNow());
         goods.setCreatedAt(Utils.getNow());
         goodsMapper.updateByPrimaryKeySelective(goods);
@@ -143,10 +140,11 @@ public class GoodsService {
     public Goods deleteGoods(Long goodsId) {
         Goods goods = new Goods();
         goods.setId(goodsId);
-//        checkGoodsBelongToUser(goods, userId);
+        checkAdminRole();
+        checkGoodsBelongToUser(goods);
+
         goods.setStatus(GoodsStatus.DELETED.getName());
         goods.setUpdatedAt(Utils.getNow());
-        goods.setCreatedAt(Utils.getNow());
         goodsMapper.updateByPrimaryKeySelective(goods);
         return goods;
     }
@@ -181,8 +179,9 @@ public class GoodsService {
     /**
      * 折扣日
      * 活动价格放在vip price中
-     * @param goods     商品
-     * @return          优惠价格
+     *
+     * @param goods 商品
+     * @return 优惠价格
      */
     public BigDecimal getGoodsDiscountPrice(Goods goods) {
         DiscountDayExample discountDayExample = new DiscountDayExample();
@@ -198,36 +197,19 @@ public class GoodsService {
         return discountDay.getPrice();
     }
 
-    private boolean isValidName(String name) {
-        return name.length() <= 100 && !name.contains("_") && !name.contains("-");
-    }
-
-    private boolean isValidDescription(String description) {
-        return description.length() <= 1024 && !description.contains("_") && !description.contains("-");
-    }
-
     public boolean checkFieldsLegal(Goods goods) {
         boolean isLegal = true;
-        // 检查名称是否合法
-        String name = goods.getName();
-        if (name == null || !isValidName(name)) {
-            isLegal = false;
-        }
-        // 检查描述是否合法
-        String description = goods.getDescription();
-        if (description == null || !isValidDescription(description)) {
-            isLegal = false;
-        }
+
         // 检查价格是否合法
         double price = goods.getPrice().doubleValue();
         if (price < 0 || price > 100000) {
             isLegal = false;
         }
         // 检查 VIP 价格是否合法
-//        double vipPrice = goods.getVIPPrice();
-//        if (vipPrice < 0 || vipPrice > 100000) {
-//            isLegal = false;
-//        }
+        BigDecimal vipPrice = goods.getVipPrice();
+        if (vipPrice.compareTo(BigDecimal.ZERO) < 0 || vipPrice.compareTo(BigDecimal.valueOf(100000)) > 0) {
+            isLegal = false;
+        }
         // 检查库存是否合法
         int stock = goods.getStock();
         if (stock < 0 || stock > 500) {
@@ -237,9 +219,7 @@ public class GoodsService {
         return isLegal;
     }
 
-
-
-    public void checkGoodsBelongToUser(Goods goods, Long userId) {
+    public void checkGoodsBelongToUser(Goods goods) {
         // 根据goods的shop查询当前用户是不是店铺的拥有者
         Long goodsId = goods.getId();
         Goods goodsResult;
@@ -247,6 +227,7 @@ public class GoodsService {
         // 非新创建商品 删除商品时只传了商品id
         if (goodsId != null) {
             goodsResult = goodsMapper.selectByPrimaryKey(goodsId);
+            Optional.ofNullable(goodsResult).orElseThrow(() -> HttpException.notFound("商品不存在"));
             Long shopId = goodsResult.getShopId();
             shopResult = shopMapper.selectByPrimaryKey(shopId);
         } else {
@@ -256,7 +237,7 @@ public class GoodsService {
         if (shopResult == null) {
             throw HttpException.forbidden("参数不合法");
         }
-        if (!Objects.equals(shopResult.getOwnerUserId(), userId)) {
+        if (!Objects.equals(shopResult.getOwnerUserId(), userRedisService.getUser().getId())) {
             throw HttpException.forbidden("拒绝访问");
         }
     }
@@ -267,4 +248,11 @@ public class GoodsService {
         String dayOfWeekStr = String.valueOf(dayOfWeek - 1);
         return days.contains(dayOfWeekStr);
     }
+
+    public void checkAdminRole() {
+        if (!Objects.equals(roleRedisService.getUserRole().getName(), "admin")) {
+            throw HttpException.notAuthorized("没有权限");
+        }
+    }
+
 }
