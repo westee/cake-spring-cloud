@@ -19,7 +19,7 @@
             <property name="useJSR310Types" value="true" />
         </javaTypeResolver>
 
-        <javaModelGenerator targetPackage="com.westee.loginservice.generate" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="com.westee.authservice.generate" targetProject="src/main/java">
             <property name="enableSubPackages" value="true"/>
             <property name="trimStrings" value="true"/>
             <property name="constructorBased" value="true"/>
@@ -29,7 +29,7 @@
             <property name="enableSubPackages" value="true"/>
         </sqlMapGenerator>
 
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.westee.loginservice.generate" targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.westee.authservice.generate" targetProject="src/main/java">
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
