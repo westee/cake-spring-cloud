@@ -45,7 +45,7 @@ public class RoleRedisService {
         return role;
     }
 
-    public Role getUserRoleFromAuthModule() {
+    private Role getUserRoleFromAuthModule() {
         String currentToken = TokenContext.getCurrentToken();
         if (Objects.isNull(currentToken)) {
             throw HttpException.notAuthorized("没有权限获取角色信息");

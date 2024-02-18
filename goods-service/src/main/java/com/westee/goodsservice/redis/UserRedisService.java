@@ -45,7 +45,7 @@ public class UserRedisService {
         return user;
     }
 
-    public User getUserFromAuthModule() {
+    private User getUserFromAuthModule() {
         String currentToken = TokenContext.getCurrentToken();
         if (Objects.isNull(currentToken)) {
             throw HttpException.notAuthorized("尚未登录");
