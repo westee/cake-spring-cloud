@@ -10,6 +10,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,6 +26,12 @@ public class ErrorHandlingController {
     public @ResponseBody
     Response<?> onError(HttpServletResponse response, HttpException e) {
         response.setStatus(e.getStatusCode());
+        return Response.of(e.getMessage(), null);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public @ResponseBody
+    Response<?> onMissingRequestHeader(HttpServletResponse response, MissingRequestHeaderException e) {
         return Response.of(e.getMessage(), null);
     }
 

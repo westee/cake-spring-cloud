@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/")
 public class UserController {
@@ -27,6 +29,16 @@ public class UserController {
             return Response.fail();
         }
         return Response.ok(userByToken);
+    }
+
+    @GetMapping("users/ids")
+    public Response<List<Long>> getUsersByToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        User userByToken = userService.getUserByToken(token.substring(7));
+        if (userByToken == null) {
+            return Response.fail();
+        }
+        List<Long> userIds = userService.getUserIds(token);
+        return Response.ok(userIds);
     }
 
 }

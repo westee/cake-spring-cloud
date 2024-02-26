@@ -102,6 +102,21 @@ public class UserService {
         return user;
     }
 
+    public List<Long> getUserIds(String token) {
+        if(Objects.isNull(token) || Objects.equals(token, "") || token.length() < 7) {
+            throw HttpException.notAuthorized("用户未登录");
+        }
+        User userByToken = getUserByToken(token.substring(7));
+        if(Objects.isNull(userByToken)) {
+            throw HttpException.notAuthorized("用户不存在");
+        }
+        if(Objects.equals(getUserRole(userByToken.getId()).getName(), "admin")) {
+            return userMapper.selectByExample(new UserExample()).stream().map(User::getId).toList();
+        }
+        List<User> users = userMapper.selectByExample(new UserExample());
+        return users.stream().map(User::getId).toList();
+    }
+
     public void createUserIfNotExist(WeChatSession weChatSession, String avatar, String name) {
         UserExample userExample = new UserExample();
         userExample.createCriteria().andWxOpenIdEqualTo(weChatSession.getOpenid());
