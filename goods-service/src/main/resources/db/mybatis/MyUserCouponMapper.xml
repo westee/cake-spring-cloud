@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westee.goodsservice.mapper.MyUserCouponMapper">
+    <insert id="batchInsertUserCoupon" parameterType="java.util.List">
+        INSERT INTO USER_COUPON (USER_ID, COUPON_ID, USED, CREATED_AT, UPDATED_AT)
+        VALUES
+        <foreach collection="list" item="userId" separator=",">
+            (#{userId}, #{couponId}, #{used}, #{now}, #{now})
+        </foreach>
+    </insert>
+
+</mapper>
