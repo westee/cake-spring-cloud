@@ -25,9 +25,8 @@
     </properties>
     <modules>
         <module>common</module>
-        <module>service-support</module>
-        <module>service-consumer</module>
-        <module>service-server</module>
+        <module>eureka-server</module>
+        <module>gateway-service</module>
         <module>auth-service</module>
         <module>goods-service</module>
         <module>order-service</module>
