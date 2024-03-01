@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westee.goodsservice.mapper.MyGoodsMapper">
+    <select id="selectGoodsByName" parameterType="string" resultType="com.westee.goodsservice.generate.Goods">
+        SELECT
+        tg.ID as ID,
+        tg.NAME as NAME,
+        tg.DESCRIPTION as DESCRIPTION,
+        tg.PRICE as PRICE,
+        tg.VIP_PRICE as VIP_PRICE,
+        tg.STOCK as STOCK,
+        tg.SHOP_ID as SHOP_ID,
+        (
+        SELECT URL
+        FROM GOODS_IMAGE
+        WHERE OWNER_GOODS_ID = tg.ID AND DELETED = 0
+        LIMIT 1
+        ) as IMG_URL
+        FROM
+        (
+        SELECT ID, NAME, DESCRIPTION, PRICE, VIP_PRICE, STOCK, SHOP_ID, CREATED_AT FROM GOODS
+        WHERE
+        <if test="name != null and name != ''">
+            name LIKE '%' #{name} '%' AND
+        </if>
+        STATUS != 'deleted'
+        ) tg
+        ORDER BY tg.CREATED_AT DESC
+        LIMIT #{start},#{offset}
+    </select>
+    <select id="countGoodsByName" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM GOODS
+        WHERE STATUS != 'deleted' AND  `NAME` LIKE '%' #{name} '%';
+    </select>
+
+</mapper>
