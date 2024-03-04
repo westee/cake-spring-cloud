@@ -2,18 +2,9 @@ package com.westee.goodsservice.service;
 
 
 import com.github.pagehelper.PageHelper;
-import com.westee.cake.entity.PageResponse;
-import com.westee.cake.generate.Coupon;
-import com.westee.cake.generate.CouponExample;
-import com.westee.cake.generate.CouponMapper;
-import com.westee.cake.generate.User;
-import com.westee.cake.generate.UserCoupon;
-import com.westee.cake.generate.UserCouponExample;
-import com.westee.cake.generate.UserCouponMapper;
-import com.westee.cake.generate.UserExample;
-import com.westee.cake.generate.UserMapper;
-import com.westee.cake.util.Utils;
 import com.westee.common.entity.PageResponse;
+import com.westee.common.entity.Response;
+import com.westee.common.exception.HttpException;
 import com.westee.common.utils.Utils;
 import com.westee.goodsservice.generate.Coupon;
 import com.westee.goodsservice.generate.CouponExample;
@@ -21,6 +12,9 @@ import com.westee.goodsservice.generate.CouponMapper;
 import com.westee.goodsservice.generate.UserCoupon;
 import com.westee.goodsservice.generate.UserCouponExample;
 import com.westee.goodsservice.generate.UserCouponMapper;
+import com.westee.goodsservice.mapper.MyUserCouponMapper;
+import com.westee.goodsservice.redis.UserRedisService;
+import com.westee.openfeign.client.RoleServiceProviderClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,15 +25,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class CouponService {
+
     private final CouponMapper couponMapper;
-    private final UserMapper userMapper;
     private final UserCouponMapper userCouponMapper;
+    private final RoleServiceProviderClient roleServiceProviderClient;
+    private final UserRedisService userRedisService;
+    private final MyUserCouponMapper myUserCouponMapper;
 
     @Autowired
-    public CouponService(CouponMapper couponMapper, UserMapper userMapper, UserCouponMapper userCouponMapper) {
+    public CouponService(CouponMapper couponMapper, UserCouponMapper userCouponMapper,
+                         UserRedisService userRedisService,
+                         RoleServiceProviderClient roleServiceProviderClient, MyUserCouponMapper myUserCouponMapper) {
         this.couponMapper = couponMapper;
-        this.userMapper = userMapper;
         this.userCouponMapper = userCouponMapper;
+        this.userRedisService = userRedisService;
+        this.roleServiceProviderClient = roleServiceProviderClient;
+        this.myUserCouponMapper = myUserCouponMapper;
     }
 
     /**
@@ -69,31 +70,19 @@ public class CouponService {
     }
 
     /**
-     * @TODO
-     * 大量用户怎么办？
-     * restTemplate发送
-     * @param couponId
+     * @param couponId 优惠券id
      */
     public void insertUserCoupon(long couponId) {
-//        UserExample userExample = new UserExample();
-//        List<User> users = userMapper.selectByExample(userExample);
-//        UserCoupon userCoupon = new UserCoupon();
-//        users.forEach(user -> {
-//            userCoupon.setCouponId(couponId);
-//            userCoupon.setUserId(user.getId());
-//            userCoupon.setUsed(false);
-//            userCoupon.setCreatedAt(Utils.getNow());
-//            userCoupon.setUpdatedAt(Utils.getNow());
-//            userCouponMapper.insert(userCoupon);
-//        });
+        Response<List<Long>> userIds = roleServiceProviderClient.getUsersIds(TokenContext.getCurrentToken());
+        myUserCouponMapper.batchInsertUserCoupon(userIds.getData(), couponId, false, Utils.getNow());
     }
 
-    public ArrayList<Coupon> getUserCouponList(Long userId, String status) {
+    public ArrayList<Coupon> getUserCouponList(String status) {
         // 查出用户有多少未使用优惠券
         UserCouponExample userCouponExample = new UserCouponExample();
         userCouponExample.setOrderByClause("`CREATED_AT` DESC");
         UserCouponExample.Criteria criteria = userCouponExample.createCriteria();
-        criteria.andUserIdEqualTo(userId);
+        criteria.andUserIdEqualTo(userRedisService.getUser().getId());
 
          if(Objects.equals(CouponStatus.UNUSED.getName(), status)) {
             criteria.andUsedEqualTo(false);
@@ -117,9 +106,9 @@ public class CouponService {
         return coupons;
     }
 
-    public long countUserCoupon(long userId) {
+    public long countUserCoupon() {
         UserCouponExample userCouponExample = new UserCouponExample();
-        userCouponExample.createCriteria().andUserIdEqualTo(userId).andUsedEqualTo(false);
+        userCouponExample.createCriteria().andUserIdEqualTo(userRedisService.getUser().getId()).andUsedEqualTo(false);
         List<UserCoupon> userCoupons = userCouponMapper.selectByExample(userCouponExample);
 
         List<Long> couponIdList = userCoupons.stream()
@@ -134,6 +123,13 @@ public class CouponService {
         return couponMapper.countByExample(couponExample);
     }
 
+    public void checkCouponExist(Long couponId) {
+        Coupon coupon = couponMapper.selectByPrimaryKey(couponId);
+        if(Objects.isNull(coupon)) {
+            throw HttpException.notFound("优惠券不存在");
+        }
+    }
+
     public enum CouponStatus {
         ALL,
         USED,
@@ -143,4 +139,5 @@ public class CouponService {
             return name().toLowerCase();
         }
     }
+
 }
